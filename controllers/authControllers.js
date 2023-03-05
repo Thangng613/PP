@@ -28,19 +28,20 @@ const authController = {
     generateAccessToken: (user) => {
         return jwt.sign(
             {
-                id: user.id,
-                admin: user.admin
+                id: User.id,
+                admin: User.admin
             },
             process.env.SECRET_TOKEN,
-            { expiresIn: '30s' }
+            { expiresIn: '20d' }
         )
+
     },
     //GENERATE REFRESH TOKEN 
     generateRefreshToken: (user) => {
         return jwt.sign(
             {
-                id: user.id,
-                admin: user.admin
+                id: User.id,
+                admin: User.admin
             },
             process.env.SECRET_TOKEN,
             { expiresIn: '365d' }
@@ -86,7 +87,7 @@ const authController = {
         if (!refreshTokens.includes(refreshToken)) {
             return res.status(403).json('Refresh token is not valid!')
         }
-        jwt.verify.apply(refreshToken, process.env.SECRET_KEY_REFRESH_TOKEN, (err, user) => {
+        jwt.verify(refreshToken, process.env.SECRET_KEY_REFRESH_TOKEN, (err, user) => {
             if (err) {
                 console.log(err);
             }
@@ -103,6 +104,13 @@ const authController = {
             })
             res.status(200).json({ accessToken: newAccessToken })
         })
+    },
+
+    //LOg OUT
+    userLOgOut: async (req, res) => {
+        res.clearCookie('refreshToken');
+        refreshTokens = refreshTokens.filter((token) => token !== req.cookies.refreshToken)
+        res.status(200).json("Log out successfully!")
     }
 }
 
